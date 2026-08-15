@@ -23,9 +23,11 @@ jobs:
       # Don't cancel the 8.4 run just because 8.3 failed — we want both results.
       fail-fast: false
       matrix:
-        # 8.3 is Laravel 13's floor, 8.4 is what you run locally.
-        # Testing both proves the app isn't accidentally depending on 8.4-only syntax.
-        php: ['8.3', '8.4']
+        # 8.4 only. Laravel 13 declares a floor of 8.3, but the resolved
+        # dependency set (Symfony 8.1, PHPUnit 13, Pest 5) requires 8.4.1+.
+        # Hostinger production runs 8.4, so this matches deployment exactly.
+        # config.platform.php in composer.json pins resolution to the same version.
+        php: ['8.4']
 
     # A real MySQL server, spun up as a container alongside the job.
     # This is the parity check your local SQLite tests can't give you.
@@ -58,7 +60,7 @@ jobs:
       # Composer downloads are the slowest part of the job.
       # Caching them by lock-file hash turns ~40s into ~3s on repeat runs.
       - name: Cache Composer packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: vendor
           key: composer-${{ matrix.php }}-${{ hashFiles('composer.lock') }}
@@ -68,7 +70,7 @@ jobs:
         run: composer install --prefer-dist --no-interaction --no-progress
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: npm
