@@ -1,0 +1,132 @@
+name: CI
+
+# Run on every push to main and on every pull request targeting main.
+# Pull requests matter later when you start branching per feature.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# If you push twice quickly, cancel the older run instead of burning
+# minutes on a result nobody will look at.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Tests (PHP ${{ matrix.php }} · MySQL)
+    runs-on: ubuntu-latest
+
+    strategy:
+      # Don't cancel the 8.4 run just because 8.3 failed — we want both results.
+      fail-fast: false
+      matrix:
+        # 8.3 is Laravel 13's floor, 8.4 is what you run locally.
+        # Testing both proves the app isn't accidentally depending on 8.4-only syntax.
+        php: ['8.3', '8.4']
+
+    # A real MySQL server, spun up as a container alongside the job.
+    # This is the parity check your local SQLite tests can't give you.
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: portfolio_testing
+        ports:
+          - 3306:3306
+        # Without this, the job races the database and fails intermittently.
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, pdo, pdo_mysql, bcmath, intl, zip, gd
+          coverage: none
+
+      # Composer downloads are the slowest part of the job.
+      # Caching them by lock-file hash turns ~40s into ~3s on repeat runs.
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ matrix.php }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ matrix.php }}-
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      # public/build is gitignored, so the Vite manifest doesn't exist in a fresh
+      # checkout. Any test that renders a Blade view using @vite would fail
+      # without this step.
+      - name: Build assets
+        run: npm run build
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Run migrations against MySQL
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: portfolio_testing
+          DB_USERNAME: root
+          DB_PASSWORD: root
+        run: php artisan migrate --force
+
+      # Override the SQLite settings baked into phpunit.xml so the suite
+      # runs against the real MySQL service above.
+      - name: Run Pest
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: portfolio_testing
+          DB_USERNAME: root
+          DB_PASSWORD: root
+        run: php artisan test
+
+  code-style:
+    name: Code style (Pint)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      # --test reports violations and exits non-zero instead of rewriting files.
+      # Locally you run plain `vendor/bin/pint` to actually fix them.
+      - name: Check formatting
+        run: vendor/bin/pint --test
