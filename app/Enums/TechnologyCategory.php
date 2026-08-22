@@ -4,17 +4,19 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
+use Filament\Support\Contracts\HasLabel;
+
 /**
  * Grouping used by the skills section on the public site.
  */
-enum TechnologyCategory: string
+enum TechnologyCategory: string implements HasLabel
 {
     case Backend = 'backend';
     case Frontend = 'frontend';
     case Mobile = 'mobile';
     case Tooling = 'tooling';
 
-    public function label(): string
+    public function getLabel(): string
     {
         return match ($this) {
             self::Backend => 'Backend',

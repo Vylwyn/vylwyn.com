@@ -6,6 +6,7 @@ use App\Enums\ProjectStatus;
 use App\Enums\TechnologyCategory;
 use App\Models\Project;
 use App\Models\Technology;
+use Illuminate\Database\UniqueConstraintViolationException;
 
 it('casts status to the ProjectStatus enum', function (): void {
     $project = Project::factory()->create(['status' => ProjectStatus::Live]);
@@ -61,7 +62,7 @@ it('cannot attach the same technology twice', function (): void {
 
     // The composite primary key on the pivot enforces this at the database level.
     expect(fn () => $project->technologies()->attach($technology))
-        ->toThrow(Illuminate\Database\UniqueConstraintViolationException::class);
+        ->toThrow(UniqueConstraintViolationException::class);
 });
 
 describe('the links helper', function (): void {
