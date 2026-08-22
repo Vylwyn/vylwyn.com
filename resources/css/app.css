@@ -3,7 +3,152 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
+/*
+| Design tokens
+|
+| Tailwind 4 configures itself in CSS rather than tailwind.config.js.
+| Every custom property declared here becomes a utility class:
+|   --color-surface  ->  bg-surface, text-surface, border-surface
+|   --font-mono      ->  font-mono
+|
+| Naming these after their role (surface, line, dim) rather than their value
+| (gray-900, gray-700) means a palette change is one edit, not a find-and-replace.
+*/
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+    /* Surfaces, darkest to lightest */
+    --color-canvas: #0a0a0f;
+    --color-surface: #12121a;
+    --color-surface-2: #171722;
+    --color-line: #232331;
+
+    /* Text, brightest to faintest */
+    --color-ink: #f4f4f7;
+    --color-dim: #9a9ab0;
+    --color-faint: #63637d;
+
+    /* Brand */
+    --color-violet: #8b5cf6;
+    --color-lavender: #a78bfa;
+    --color-azure: #3b82f6;
+    --color-rose: #ec4899;
+
+    /* Status */
+    --color-ok: #34d399;
+    --color-warn: #fbbf24;
+}
+
+/*
+| Base
+*/
+@layer base {
+    html {
+        scroll-behavior: smooth;
+        /* Stops anchor targets hiding behind the sticky nav. */
+        scroll-padding-top: 5rem;
+    }
+
+    body {
+        @apply bg-canvas text-ink font-sans antialiased;
+    }
+
+    ::selection {
+        background-color: color-mix(in oklab, var(--color-violet) 35%, transparent);
+    }
+
+    /* Visible keyboard focus. Never remove this without replacing it. */
+    :focus-visible {
+        @apply outline-2 outline-offset-2 outline-lavender;
+    }
+}
+
+/*
+| Components
+*/
+@layer components {
+    .text-gradient {
+        background: linear-gradient(100deg, var(--color-lavender) 0%, #60a5fa 45%, #f472b6 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    /* Gradient border via a masked pseudo-element — Tailwind can't express this. */
+    .ring-gradient {
+        position: relative;
+    }
+
+    .ring-gradient::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        padding: 1px;
+        background: linear-gradient(
+            140deg,
+            color-mix(in oklab, var(--color-violet) 55%, transparent),
+            transparent 45%,
+            color-mix(in oklab, var(--color-azure) 40%, transparent)
+        );
+        -webkit-mask:
+            linear-gradient(#000 0 0) content-box,
+            linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+    }
+
+    .ring-gradient:hover::before {
+        opacity: 1;
+    }
+}
+
+/*
+| Scroll reveal
+|
+| Elements start hidden and animate in when observed by IntersectionObserver.
+| The `.no-js` guard means content stays visible if JavaScript fails — a blank
+| page is a far worse failure than a missing animation.
+*/
+@layer utilities {
+    .reveal {
+        opacity: 0;
+        transform: translateY(24px);
+        transition:
+            opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+            transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal.is-visible,
+    .no-js .reveal {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/*
+| Respect the user's motion preference. Vestibular disorders make large
+| motion genuinely unpleasant, and this is one line.
+*/
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .reveal {
+        opacity: 1;
+        transform: none;
+    }
 }
