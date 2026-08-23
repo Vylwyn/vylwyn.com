@@ -12,7 +12,7 @@ declare(strict_types=1);
 return [
     'name' => 'Vylwyn D’Souza',
     'full_name' => 'Vylwyn Anthony D’Souza',
-    'role' => 'Senior Full-Stack Engineer',
+    'role' => 'IT Team Lead & Full-Stack Developer',
     'specialisms' => 'Laravel · Flutter',
     'location' => 'Kuwait',
     'relocating_to' => 'India',
@@ -30,7 +30,7 @@ return [
     ],
 
     'seo' => [
-        'title' => 'Vylwyn D’Souza — Senior Full-Stack Engineer',
-        'description' => 'Senior full-stack engineer with 11 years of experience. Nine years at Alghanim International in Kuwait building Laravel and Flutter systems. Relocating to India.',
+        'title' => 'Vylwyn D’Souza — IT Team Lead & Full-Stack Developer',
+        'description' => 'I lead a 22-person IT support and procurement team at Alghanim International in Kuwait, and build production Laravel and Flutter applications. MCA in Computer Science. Relocating to India.',
     ],
 ];

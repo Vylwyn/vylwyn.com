@@ -177,7 +177,7 @@ class PortfolioSeeder extends Seeder
                 'location' => 'Kuwait',
                 'started_on' => '2017-07-01',
                 'ended_on' => null, // current role
-                'summary' => null,  // NEEDS CONFIRMATION: team size, systems owned, measurable outcome
+                'summary' => 'Lead a 22-person team across IT support (18) and procurement (4) for a large diversified conglomerate. Day-to-day this is service delivery, escalation, vendor management and approval workflows — the operational side of enterprise IT, at scale. It is also where most of my product instincts come from: I have spent nine years watching where internal tools break down for the people who have to use them.',
                 'sort_order' => 1,
             ],
             [

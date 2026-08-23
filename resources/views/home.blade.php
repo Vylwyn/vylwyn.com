@@ -3,9 +3,10 @@
     {{-- ─────────────────────────── Hero ─────────────────────────── --}}
     <header class="mx-auto max-w-[1140px] px-5 pt-26 pb-21 text-center sm:px-7">
 
-        <p class="reveal mb-6.5 flex items-center justify-center gap-3 font-mono text-xs uppercase tracking-[0.09em] text-lavender">
+        <p
+            class="reveal mb-6.5 flex items-center justify-center gap-3 font-mono text-xs uppercase tracking-[0.09em] text-lavender">
             <span aria-hidden="true" class="h-px w-6.5 bg-gradient-to-r from-transparent to-lavender"></span>
-            {{ config('portfolio.location') }} · relocating to {{ config('portfolio.relocating_to') }}
+            {{ config('portfolio.location') }} · {{ config('portfolio.relocating_to') }}
             <span aria-hidden="true" class="h-px w-6.5 bg-gradient-to-r from-lavender to-transparent"></span>
         </p>
 
@@ -17,42 +18,42 @@
             {{ config('portfolio.role') }} — {{ config('portfolio.specialisms') }}
         </p>
 
-        <p class="reveal mx-auto mb-5.5 max-w-[20ch] text-2xl font-extrabold leading-[1.12] tracking-tight sm:text-4xl lg:text-[2.5rem]">
-            I build the systems <span class="text-gradient">people depend on.</span>
+        <p
+            class="reveal mx-auto mb-5.5 max-w-[24ch] text-2xl font-extrabold leading-[1.12] tracking-tight sm:text-4xl lg:text-[2.5rem]">
+            I run the IT operations. <span class="text-gradient">I also build the tools.</span>
         </p>
 
         <p class="reveal mx-auto mb-9.5 max-w-[62ch] text-dim sm:text-lg">
-            Nine years at <strong class="font-semibold text-ink">Alghanim International</strong> in Kuwait —
-            leading IT delivery, and still shipping production code most weeks.
+            Nine years leading a 20+ person team at
+            <strong class="font-semibold text-ink">Alghanim International</strong> in Kuwait —
+            and seven years building tools that solve real problems
         </p>
 
         <div class="reveal mb-14.5 flex flex-wrap justify-center gap-3.5">
             <a href="#work"
-               class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet to-azure px-6.5 py-3.5 text-sm font-semibold text-white shadow-[0_8px_26px_-8px_rgba(139,92,246,0.6)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_-8px_rgba(139,92,246,0.78)]">
+                class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet to-azure px-6.5 py-3.5 text-sm font-semibold text-white shadow-[0_8px_26px_-8px_rgba(139,92,246,0.6)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_-8px_rgba(139,92,246,0.78)]">
                 Explore my work <span aria-hidden="true">→</span>
             </a>
 
             <a href="#contact"
-               class="inline-flex items-center gap-2 rounded-xl border border-line bg-surface px-6.5 py-3.5 text-sm font-semibold text-ink transition duration-300 hover:-translate-y-0.5 hover:border-violet/40">
+                class="inline-flex items-center gap-2 rounded-xl border border-line bg-surface px-6.5 py-3.5 text-sm font-semibold text-ink transition duration-300 hover:-translate-y-0.5 hover:border-violet/40">
                 Get in touch
             </a>
         </div>
 
         <div class="reveal grid grid-cols-2 gap-3.5 md:grid-cols-4">
+            {{-- Every one of these is verifiable. No placeholders. --}}
+            <x-stat-card value="22" label="People led" />
             <x-stat-card value="9+" label="Years at Alghanim" />
-            <x-stat-card value="11" label="Years experience" />
-            <x-stat-card pending label="Users supported" />
-            <x-stat-card pending label="Systems shipped" />
+            <x-stat-card value="7" label="Years building software" />
+            <x-stat-card value="MCA" label="Computer Science" />
         </div>
     </header>
 
     {{-- ─────────────────────────── Work ─────────────────────────── --}}
     <section id="work" class="mx-auto max-w-[1140px] scroll-mt-20 px-5 py-22 sm:px-7">
-        <x-section-heading
-            tag="// selected work"
-            heading="Things I've shipped"
-            intro="Real systems with real users. Each has a full case study covering the problem, constraints, decisions and outcome."
-        />
+        <x-section-heading tag="// selected work" heading="Things I've shipped"
+            intro="Real systems with real users. Each has a full case study covering the problem, constraints, decisions and outcome." />
 
         @if ($projects->isEmpty())
             <p class="rounded-2xl border border-dashed border-line py-12 text-center text-dim">
@@ -69,11 +70,8 @@
 
     {{-- ──────────────────────── Experience ──────────────────────── --}}
     <section id="experience" class="mx-auto max-w-[1140px] scroll-mt-20 px-5 py-22 sm:px-7">
-        <x-section-heading
-            tag="// career"
-            heading="Eleven years, two countries"
-            intro="Long tenures. I stay long enough to maintain what I build — which is where the real lessons are."
-        />
+        <x-section-heading tag="// career" heading="Eleven years, two countries"
+            intro="Operations and support leadership, alongside seven years of building software on the side." />
 
         {{-- The vertical rule is drawn on the list; each item positions its own dot. --}}
         <ol class="relative mx-auto max-w-[820px] pl-7.5
@@ -92,8 +90,9 @@
         <div class="mx-auto grid max-w-[980px] items-start gap-11 lg:grid-cols-[220px_1fr]">
 
             {{-- Photo placeholder. Fixed aspect ratio so swapping in the real
-                 image causes no layout shift. --}}
-            <div class="reveal relative flex aspect-square flex-col items-center justify-center gap-2.5 overflow-hidden rounded-[18px] border border-dashed border-violet/35 bg-gradient-to-br from-surface-2 to-surface p-4.5 text-center font-mono text-[11px] text-faint">
+            image causes no layout shift. --}}
+            <div
+                class="reveal relative flex aspect-square flex-col items-center justify-center gap-2.5 overflow-hidden rounded-[18px] border border-dashed border-violet/35 bg-gradient-to-br from-surface-2 to-surface p-4.5 text-center font-mono text-[11px] text-faint">
                 <div aria-hidden="true" class="absolute inset-0 bg-gradient-to-br from-violet/15 to-transparent"></div>
                 <span class="relative text-2xl">◍</span>
                 <span class="relative">PHOTO<br>600 × 600</span>
@@ -102,23 +101,26 @@
 
             <div class="reveal space-y-4 text-dim">
                 <p>
-                    I'm a full-stack engineer who also leads a team — not a manager who stopped coding.
-                    That distinction matters, and it's the thing this site exists to prove.
+                    I've spent nine years leading IT operations at
+                    <strong class="font-semibold text-ink">Alghanim International</strong> in Kuwait — a 22-person
+                    support and procurement team. Somewhere along the way I got tired of watching good processes
+                    fail because the software didn't fit them, and started building.
                 </p>
                 <p>
-                    Nine years at <strong class="font-semibold text-ink">Alghanim International</strong> taught me
-                    what side projects can't: what happens to software in year three. The shortcuts that compound,
-                    the data model you regret, the integration nobody documented. Most of what I know about
-                    building well came from maintaining things I built badly.
+                    Seven years later I ship production
+                    <strong class="font-semibold text-ink">Laravel and Flutter</strong> applications: a bilingual
+                    commercial site for a client in Kuwait, a photo-booth platform that had to survive shared
+                    hosting, and RoomSphere — a meeting-room and device management system that exists because
+                    I've spent a decade watching offices manage resources badly.
                 </p>
                 <p>
-                    My work lives in <strong class="font-semibold text-ink">Laravel and Flutter</strong>, and I'm
-                    drawn to the invisible parts — data modelling, failure handling, offline behaviour, the
-                    reliability nobody notices until it's gone.
+                    The combination is the point. Most people building internal tools have never run the team
+                    that has to use them. I have, and I can build the thing too.
                 </p>
                 <p>
-                    I'm preparing to <strong class="font-semibold text-ink">relocate to India</strong> and looking
-                    for senior or lead full-stack roles. I also take on selected freelance work.
+                    I hold an <strong class="font-semibold text-ink">MCA in Computer Science</strong> and I'm
+                    preparing to relocate to India — looking for roles where both halves count: technical product
+                    ownership, internal tools, or full-stack development on a team I can learn from.
                 </p>
                 <p class="text-[0.85rem] text-faint">Google UX Design Certificate — Coursera, 2023</p>
             </div>
@@ -145,15 +147,55 @@
 
     {{-- ────────────────────────── Contact ───────────────────────── --}}
     <section id="contact" class="mx-auto max-w-[1140px] scroll-mt-20 px-5 py-22 sm:px-7">
-        <div class="reveal rounded-[26px] border border-violet/25 bg-gradient-to-br from-violet/15 to-azure/5 px-6 py-14 text-center backdrop-blur-md">
+        <div
+            class="reveal rounded-[26px] border border-violet/25 bg-gradient-to-br from-violet/15 to-azure/5 px-6 py-14 text-center backdrop-blur-md">
             <h2 class="mb-3 text-3xl font-extrabold tracking-tight sm:text-4xl">Let's build something</h2>
             <p class="mx-auto mb-8 max-w-[46ch] text-dim">
-                Open to senior and lead full-stack roles in India, and to selected freelance work.
+                Open to technical product ownership, internal tools and full-stack roles in India —
+                and to selected freelance work.
             </p>
 
-            <p class="mx-auto max-w-[46ch] rounded-xl border border-dashed border-warn/50 px-4 py-3 text-sm text-warn">
-                Contact form goes here next — Livewire, with validation and rate limiting.
-            </p>
+            <livewire:contact-form />
+
+            <div class="mt-9 border-t border-violet/20 pt-7">
+                <p class="mb-4 text-sm text-faint">Or reach me directly</p>
+
+                <div class="flex flex-wrap justify-center gap-3">
+                    @if ($email = config('portfolio.contact.email'))
+                        <a href="mailto:{{ $email }}"
+                           class="inline-flex items-center gap-2 rounded-xl border border-line bg-surface px-5 py-2.5 text-sm font-semibold text-ink transition duration-300 hover:-translate-y-0.5 hover:border-violet/40">
+                            Email
+                        </a>
+                    @endif
+
+                    @if ($whatsapp = config('portfolio.contact.whatsapp'))
+                        {{-- wa.me expects digits only, no plus sign or spaces. --}}
+                        <a href="https://wa.me/{{ $whatsapp }}"
+                           target="_blank"
+                           rel="noopener"
+                           class="inline-flex items-center gap-2 rounded-xl border border-line bg-surface px-5 py-2.5 text-sm font-semibold text-ink transition duration-300 hover:-translate-y-0.5 hover:border-ok/40">
+                            WhatsApp
+                            <span class="sr-only">(opens in a new tab)</span>
+                        </a>
+                    @endif
+
+                    <a href="{{ config('portfolio.contact.linkedin') }}"
+                       target="_blank"
+                       rel="noopener"
+                       class="inline-flex items-center gap-2 rounded-xl border border-line bg-surface px-5 py-2.5 text-sm font-semibold text-ink transition duration-300 hover:-translate-y-0.5 hover:border-azure/40">
+                        LinkedIn
+                        <span class="sr-only">(opens in a new tab)</span>
+                    </a>
+
+                    <a href="{{ config('portfolio.contact.github') }}"
+                       target="_blank"
+                       rel="noopener"
+                       class="inline-flex items-center gap-2 rounded-xl border border-line bg-surface px-5 py-2.5 text-sm font-semibold text-ink transition duration-300 hover:-translate-y-0.5 hover:border-violet/40">
+                        GitHub
+                        <span class="sr-only">(opens in a new tab)</span>
+                    </a>
+                </div>
+            </div>
         </div>
     </section>
 
