@@ -1,4 +1,5 @@
-<x-layouts.app :title="$project->title" :description="$project->tagline">
+{{-- Passing :project adds CreativeWork structured data and switches og:type to article. --}}
+<x-layouts.app :title="$project->title" :description="$project->tagline" :project="$project">
 
     <article class="mx-auto max-w-[820px] px-5 pt-20 pb-16 sm:px-7">
 

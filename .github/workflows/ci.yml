@@ -54,7 +54,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: mbstring, pdo, pdo_mysql, bcmath, intl, zip, gd
+          extensions: mbstring, pdo, pdo_mysql, bcmath, intl, zip, gd, xmlwriter
           coverage: none
 
       # Composer downloads are the slowest part of the job.
@@ -132,3 +132,141 @@ jobs:
       # Locally you run plain `vendor/bin/pint` to actually fix them.
       - name: Check formatting
         run: vendor/bin/pint --test
+
+  deploy:
+    name: Deploy to production
+    runs-on: ubuntu-latest
+
+    # Only after both checks pass, only on main, and never for pull requests.
+    # A broken build must not be able to reach the live site.
+    needs: [tests, code-style]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    # Two deploys overlapping would rsync half-states over each other.
+    concurrency:
+      group: production
+      cancel-in-progress: false
+
+    environment:
+      name: production
+      url: https://vylwyn.com
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo, pdo_mysql, bcmath, intl, zip, gd, xmlwriter
+          coverage: none
+
+      # --no-dev strips Pest, Pint, Boost and friends. Production has no reason
+      # to carry test tooling, and it meaningfully shrinks what gets uploaded.
+      - name: Install production dependencies
+        run: composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-progress
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      # Hostinger has no Node, so the compiled assets are produced here and
+      # shipped. This is why public/build can stay gitignored.
+      - name: Build assets
+        run: npm run build
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          # Pin the host key rather than disabling checking — accepting any key
+          # would leave the deploy open to a man-in-the-middle.
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      # Step 1 — the application, into a directory it owns exclusively.
+      #
+      # --delete makes the target byte-identical to the build, which is only
+      # safe because DEPLOY_PATH contains nothing but this app. It must never
+      # point at public_html: that directory also holds the subdomain folders
+      # (roomsphere, fairshare, coolpextest…) and --delete would erase them.
+      - name: Upload application
+        run: |
+          rsync -az --delete \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='.env' \
+            --exclude='node_modules' \
+            --exclude='storage/app' \
+            --exclude='storage/framework' \
+            --exclude='storage/logs' \
+            --exclude='public/storage' \
+            --exclude='tests' \
+            -e "ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/id_ed25519" \
+            ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.DEPLOY_PATH }}/
+
+      - name: Publish web root and run post-deploy commands
+        run: |
+          ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/id_ed25519 \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'ENDSSH'
+            set -e
+
+            APP_PATH="${{ secrets.DEPLOY_PATH }}"
+            WEB_ROOT="${{ secrets.PUBLIC_HTML_PATH }}"
+
+            cd "$APP_PATH"
+
+            # Refuse requests while migrations run, then lift it.
+            php artisan down --retry=15 || true
+
+            php artisan migrate --force
+
+            # Creates laravel/public/storage. We don't copy that symlink across;
+            # public_html gets its own, pointing at the same target.
+            php artisan storage:link || true
+
+            # Cache config, routes, views and events. Biggest production
+            # speed-up available, and the reason env() must never be called
+            # outside config files — once cached it returns null.
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            php artisan event:cache
+
+            # Republish Filament's assets to match the installed version.
+            php artisan filament:upgrade
+
+            # Step 2 — publish the web root.
+            #
+            # Deliberately NO --delete here. public_html also contains the
+            # subdomain folders, which must survive untouched.
+            rsync -a \
+              --exclude='storage' \
+              --exclude='index.php' \
+              "$APP_PATH/public/" "$WEB_ROOT/"
+
+            # Entry point rewritten to bootstrap from ../laravel, so the
+            # application itself stays above the document root.
+            cp "$APP_PATH/deploy/public_html-index.php" "$WEB_ROOT/index.php"
+
+            # Public disk symlink for uploaded cover images.
+            ln -sfn "$APP_PATH/storage/app/public" "$WEB_ROOT/storage"
+
+            php artisan up
+          ENDSSH
+
+      - name: Verify the site responds
+        run: |
+          # A deploy that "succeeds" while serving a 500 is worse than a
+          # failed one, because nothing tells you.
+          sleep 5
+          code=$(curl -s -o /dev/null -w '%{http_code}' https://vylwyn.com)
+          echo "vylwyn.com returned $code"
+          test "$code" = "200"

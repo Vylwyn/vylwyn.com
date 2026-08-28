@@ -1,2 +1,9 @@
 User-agent: *
-Disallow:
+Allow: /
+
+# Admin panel — no reason for it to be crawled or indexed.
+# Note this only asks well-behaved crawlers to stay away; it is not
+# access control. Authentication is what actually protects it.
+Disallow: /vrdstudio
+
+Sitemap: https://vylwyn.com/sitemap.xml
