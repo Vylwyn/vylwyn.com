@@ -223,6 +223,20 @@ jobs:
 
             cd "$APP_PATH"
 
+            # Runtime directories are excluded from rsync so their contents
+            # survive deploys — which means on a fresh server they don't exist
+            # at all, and Laravel fails with "Please provide a valid cache path".
+            # Creating them here makes the deploy self-healing.
+            mkdir -p storage/framework/cache/data \
+                     storage/framework/sessions \
+                     storage/framework/views \
+                     storage/framework/testing \
+                     storage/app/public \
+                     storage/app/private \
+                     storage/logs \
+                     bootstrap/cache
+            chmod -R 775 storage bootstrap/cache
+
             # Refuse requests while migrations run, then lift it.
             php artisan down --retry=15 || true
 
