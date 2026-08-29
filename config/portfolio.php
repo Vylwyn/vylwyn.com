@@ -31,6 +31,6 @@ return [
 
     'seo' => [
         'title' => 'Vylwyn D’Souza — IT Team Lead & Full-Stack Developer',
-        'description' => 'I lead a 22-person IT support and procurement team at Alghanim International in Kuwait, and build production Laravel and Flutter applications. MCA in Computer Science. Relocating to India.',
+        'description' => 'I lead a 22-person IT support and procurement team at Alghanim International in Kuwait, and build production Laravel and Flutter applications. MCA in Computer Science.',
     ],
 ];

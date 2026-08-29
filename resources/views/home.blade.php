@@ -6,7 +6,9 @@
         <p
             class="reveal mb-6.5 flex items-center justify-center gap-3 font-mono text-xs uppercase tracking-[0.09em] text-lavender">
             <span aria-hidden="true" class="h-px w-6.5 bg-gradient-to-r from-transparent to-lavender"></span>
-            {{ config('portfolio.location') }} · {{ config('portfolio.relocating_to') }}
+            {{-- Relocation is only advertised while actively looking. Flip
+                 PORTFOLIO_AVAILABLE in .env to turn the signalling back on. --}}
+            {{ config('portfolio.location') }}@if (config('portfolio.available')) · {{ config('portfolio.relocating_to') }}@endif
             <span aria-hidden="true" class="h-px w-6.5 bg-gradient-to-r from-lavender to-transparent"></span>
         </p>
 
@@ -24,9 +26,9 @@
         </p>
 
         <p class="reveal mx-auto mb-9.5 max-w-[62ch] text-dim sm:text-lg">
-            Nine years leading a 20+ person team at
-            <strong class="font-semibold text-ink">Alghanim International</strong> in Kuwait —
-            and seven years building tools that solve real problems
+            Nine years leading a 22-person team at
+            <strong class="font-semibold text-ink">Alghanim International</strong> in Kuwait,
+            and seven years building software alongside it.
         </p>
 
         <div class="reveal mb-14.5 flex flex-wrap justify-center gap-3.5">
@@ -53,7 +55,7 @@
     {{-- ─────────────────────────── Work ─────────────────────────── --}}
     <section id="work" class="mx-auto max-w-[1140px] scroll-mt-20 px-5 py-22 sm:px-7">
         <x-section-heading tag="// selected work" heading="Things I've shipped"
-            intro="Real systems with real users. Each has a full case study covering the problem, constraints, decisions and outcome." />
+            intro="Real applications with real users, built alongside a full-time role. Laravel on the backend, Flutter on mobile." />
 
         @if ($projects->isEmpty())
             <p class="rounded-2xl border border-dashed border-line py-12 text-center text-dim">
@@ -101,26 +103,26 @@
 
             <div class="reveal space-y-4 text-dim">
                 <p>
-                    I've spent nine years leading IT operations at
-                    <strong class="font-semibold text-ink">Alghanim International</strong> in Kuwait — a 22-person
-                    support and procurement team. Somewhere along the way I got tired of watching good processes
-                    fail because the software didn't fit them, and started building.
+                    I lead a 22-person team across IT support and procurement at
+                    <strong class="font-semibold text-ink">Alghanim International</strong> in Kuwait. Alongside
+                    that, I've spent seven years building software — for clients, and for problems I found
+                    worth solving.
                 </p>
                 <p>
-                    Seven years later I ship production
-                    <strong class="font-semibold text-ink">Laravel and Flutter</strong> applications: a bilingual
-                    commercial site for a client in Kuwait, a photo-booth platform that had to survive shared
-                    hosting, and RoomSphere — a meeting-room and device management system that exists because
-                    I've spent a decade watching offices manage resources badly.
+                    That work is in <strong class="font-semibold text-ink">Laravel and Flutter</strong>: a
+                    bilingual commercial site for a client here in Kuwait, a photo-booth platform that had to
+                    survive shared hosting, and RoomSphere — a meeting-room and device management system.
                 </p>
                 <p>
                     The combination is the point. Most people building internal tools have never run the team
-                    that has to use them. I have, and I can build the thing too.
+                    that has to use them. Nine years of tickets, escalations and approval workflows is an
+                    unusual thing to bring to a codebase, and it shapes how I think about software people are
+                    required to use rather than choose.
                 </p>
                 <p>
-                    I hold an <strong class="font-semibold text-ink">MCA in Computer Science</strong> and I'm
-                    preparing to relocate to India — looking for roles where both halves count: technical product
-                    ownership, internal tools, or full-stack development on a team I can learn from.
+                    I'm drawn to the invisible parts — data modelling, failure handling, offline behaviour,
+                    the reliability nobody notices until it's gone. I hold an
+                    <strong class="font-semibold text-ink">MCA in Computer Science</strong>.
                 </p>
                 <p class="text-[0.85rem] text-faint">Google UX Design Certificate — Coursera, 2023</p>
             </div>
@@ -151,8 +153,13 @@
             class="reveal rounded-[26px] border border-violet/25 bg-gradient-to-br from-violet/15 to-azure/5 px-6 py-14 text-center backdrop-blur-md">
             <h2 class="mb-3 text-3xl font-extrabold tracking-tight sm:text-4xl">Let's build something</h2>
             <p class="mx-auto mb-8 max-w-[46ch] text-dim">
-                Open to technical product ownership, internal tools and full-stack roles in India —
-                and to selected freelance work.
+                @if (config('portfolio.available'))
+                    Open to technical product ownership, internal tools and full-stack roles in India —
+                    and to selected freelance work.
+                @else
+                    Always happy to talk about internal tools, Laravel, or an interesting problem.
+                    Freelance enquiries welcome.
+                @endif
             </p>
 
             <livewire:contact-form />
