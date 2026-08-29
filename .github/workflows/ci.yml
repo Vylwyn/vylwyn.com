@@ -237,6 +237,16 @@ jobs:
                      bootstrap/cache
             chmod -R 775 storage bootstrap/cache
 
+            # Fail fast on a missing APP_KEY rather than deploying a site that
+            # 500s on every request. Deliberately NOT auto-generating one: that
+            # would mint a new key on some future fresh deploy and silently
+            # invalidate every session and encrypted value in the database.
+            if ! grep -qE '^APP_KEY=base64:.+' .env; then
+              echo "FATAL: APP_KEY is missing or empty in $APP_PATH/.env"
+              echo "Run once on the server:  php artisan key:generate --force && php artisan config:cache"
+              exit 1
+            fi
+
             # Refuse requests while migrations run, then lift it.
             php artisan down --retry=15 || true
 
@@ -278,9 +288,40 @@ jobs:
 
       - name: Verify the site responds
         run: |
-          # A deploy that "succeeds" while serving a 500 is worse than a
-          # failed one, because nothing tells you.
+          # A deploy that "succeeds" while serving a 500 is worse than a failed
+          # one, because nothing tells you. Print enough detail that the cause
+          # is obvious from the log alone.
           sleep 5
-          code=$(curl -s -o /dev/null -w '%{http_code}' https://vylwyn.com)
-          echo "vylwyn.com returned $code"
-          test "$code" = "200"
+
+          echo "--- response headers ---"
+          curl -sSI https://vylwyn.com | head -15
+
+          code=$(curl -s -o /tmp/body.html -w '%{http_code}' https://vylwyn.com)
+          redirect=$(curl -s -o /dev/null -w '%{redirect_url}' https://vylwyn.com)
+          bytes=$(wc -c < /tmp/body.html)
+
+          echo "--- summary ---"
+          echo "status:   $code"
+          echo "redirect: ${redirect:-none}"
+          echo "bytes:    $bytes"
+
+          if [ "$code" != "200" ]; then
+            echo "FAIL: expected 200."
+            [ -n "$redirect" ] && echo "The domain is redirecting. Check hPanel → Domains → Redirects."
+            echo "--- first 40 lines of body ---"
+            head -40 /tmp/body.html
+            exit 1
+          fi
+
+          # A 200 with an empty body usually means PHP fatally errored with
+          # display_errors off — check storage/logs on the server.
+          if [ "$bytes" -lt 500 ]; then
+            echo "FAIL: 200 but body is only $bytes bytes."
+            cat /tmp/body.html
+            exit 1
+          fi
+
+          # Prove Laravel actually rendered, not just that Apache served something.
+          grep -q "Vylwyn" /tmp/body.html \
+            && echo "OK: page rendered" \
+            || { echo "FAIL: 200 but content looks wrong"; head -40 /tmp/body.html; exit 1; }
