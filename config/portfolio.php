@@ -19,6 +19,17 @@ return [
 
     'available' => env('PORTFOLIO_AVAILABLE', true),
 
+    /**
+     * Addresses permitted to sign in to the Filament panel.
+     *
+     * Comma-separated in ADMIN_EMAILS. Lowercased here so a capitalised
+     * address in .env still matches. An empty list denies everyone.
+     */
+    'admin_emails' => array_values(array_filter(array_map(
+        static fn (string $email): string => strtolower(trim($email)),
+        explode(',', (string) env('ADMIN_EMAILS', '')),
+    ))),
+
     'contact' => [
         'email' => env('PORTFOLIO_EMAIL'),
 
