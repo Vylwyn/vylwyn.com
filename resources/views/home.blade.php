@@ -12,23 +12,24 @@
             <span aria-hidden="true" class="h-px w-6.5 bg-gradient-to-r from-lavender to-transparent"></span>
         </p>
 
+        {{-- All hero copy is editable at /vrdstudio → Site content.
+             valueOr() falls back to config so a fresh install still renders. --}}
         <h1 class="reveal mb-3.5 text-4xl font-extrabold leading-[1.02] tracking-tighter sm:text-6xl lg:text-[4.3rem]">
-            {{ config('portfolio.name') }}
+            {{ $content->valueOr('hero_name', config('portfolio.name')) }}
         </h1>
 
         <p class="text-gradient reveal mb-8.5 font-mono text-sm font-medium sm:text-base">
-            {{ config('portfolio.role') }} — {{ config('portfolio.specialisms') }}
+            {{ $content->valueOr('hero_role', config('portfolio.role')) }}@if ($specialisms = $content->valueOr('hero_specialisms', config('portfolio.specialisms'))) — {{ $specialisms }}@endif
         </p>
 
         <p
             class="reveal mx-auto mb-5.5 max-w-[24ch] text-2xl font-extrabold leading-[1.12] tracking-tight sm:text-4xl lg:text-[2.5rem]">
-            I run the IT operations. <span class="text-gradient">I also build the tools.</span>
+            {{ $content->valueOr('hero_tagline_lead', 'I run the IT operations.') }}
+            <span class="text-gradient">{{ $content->valueOr('hero_tagline_highlight', 'I also build the tools.') }}</span>
         </p>
 
         <p class="reveal mx-auto mb-9.5 max-w-[62ch] text-dim sm:text-lg">
-            Nine years leading a 22-person team at
-            <strong class="font-semibold text-ink">Alghanim International</strong> in Kuwait,
-            and seven years building software alongside it.
+            {{ $content->valueOr('hero_lede', 'Nine years leading a 22-person team at Alghanim International in Kuwait, and seven years building software alongside it.') }}
         </p>
 
         <div class="reveal mb-14.5 flex flex-wrap justify-center gap-3.5">
@@ -54,8 +55,9 @@
 
     {{-- ─────────────────────────── Work ─────────────────────────── --}}
     <section id="work" class="mx-auto max-w-[1140px] scroll-mt-20 px-5 py-22 sm:px-7">
-        <x-section-heading tag="// selected work" heading="Things I've shipped"
-            intro="Real applications with real users, built alongside a full-time role. Laravel on the backend, Flutter on mobile." />
+        <x-section-heading tag="// selected work"
+            :heading="$content->valueOr('work_heading', 'Things I’ve shipped')"
+            :intro="$content->valueOr('work_intro', 'Real applications with real users, built alongside a full-time role.')" />
 
         @if ($projects->isEmpty())
             <p class="rounded-2xl border border-dashed border-line py-12 text-center text-dim">
@@ -72,8 +74,9 @@
 
     {{-- ──────────────────────── Experience ──────────────────────── --}}
     <section id="experience" class="mx-auto max-w-[1140px] scroll-mt-20 px-5 py-22 sm:px-7">
-        <x-section-heading tag="// career" heading="Eleven years, two countries"
-            intro="Operations and support leadership, alongside seven years of building software on the side." />
+        <x-section-heading tag="// career"
+            :heading="$content->valueOr('experience_heading', 'Eleven years, two countries')"
+            :intro="$content->valueOr('experience_intro', 'Operations and support leadership, alongside seven years of building software.')" />
 
         {{-- The vertical rule is drawn on the list; each item positions its own dot. --}}
         <ol class="relative mx-auto max-w-[820px] pl-7.5
@@ -87,7 +90,7 @@
 
     {{-- ─────────────────────────── About ────────────────────────── --}}
     <section id="about" class="mx-auto max-w-[1140px] scroll-mt-20 px-5 py-22 sm:px-7">
-        <x-section-heading tag="// about" heading="Hey, I'm Vylwyn" />
+        <x-section-heading tag="// about" :heading="$content->valueOr('about_heading', 'Hey, I’m Vylwyn')" />
 
         <div class="mx-auto grid max-w-[980px] items-start gap-11 lg:grid-cols-[220px_1fr]">
 
@@ -101,30 +104,13 @@
                 <span class="relative text-[#3a3a4e]">placeholder</span>
             </div>
 
-            <div class="reveal space-y-4 text-dim">
-                <p>
-                    I lead a 22-person team across IT support and procurement at
-                    <strong class="font-semibold text-ink">Alghanim International</strong> in Kuwait. Alongside
-                    that, I've spent seven years building software — for clients, and for problems I found
-                    worth solving.
-                </p>
-                <p>
-                    That work is in <strong class="font-semibold text-ink">Laravel and Flutter</strong>: a
-                    bilingual commercial site for a client here in Kuwait, a photo-booth platform that had to
-                    survive shared hosting, and RoomSphere — a meeting-room and device management system.
-                </p>
-                <p>
-                    The combination is the point. Most people building internal tools have never run the team
-                    that has to use them. Nine years of tickets, escalations and approval workflows is an
-                    unusual thing to bring to a codebase, and it shapes how I think about software people are
-                    required to use rather than choose.
-                </p>
-                <p>
-                    I'm drawn to the invisible parts — data modelling, failure handling, offline behaviour,
-                    the reliability nobody notices until it's gone. I hold an
-                    <strong class="font-semibold text-ink">MCA in Computer Science</strong>.
-                </p>
-                <p class="text-[0.85rem] text-faint">Google UX Design Certificate — Coursera, 2023</p>
+            {{-- Authored as markdown in the admin panel. Trusted content —
+                 only you can write it — so rendering as HTML is safe here. --}}
+            <div class="reveal space-y-4 text-dim
+                        [&_a]:text-lavender [&_a]:underline [&_a]:underline-offset-2
+                        [&_li]:ml-5 [&_li]:list-disc
+                        [&_strong]:font-semibold [&_strong]:text-ink">
+                {!! Str::markdown($content->valueOr('about_body', '')) !!}
             </div>
         </div>
 
@@ -151,15 +137,11 @@
     <section id="contact" class="mx-auto max-w-[1140px] scroll-mt-20 px-5 py-22 sm:px-7">
         <div
             class="reveal rounded-[26px] border border-violet/25 bg-gradient-to-br from-violet/15 to-azure/5 px-6 py-14 text-center backdrop-blur-md">
-            <h2 class="mb-3 text-3xl font-extrabold tracking-tight sm:text-4xl">Let's build something</h2>
+            <h2 class="mb-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
+                {{ $content->valueOr('contact_heading', 'Let’s build something') }}
+            </h2>
             <p class="mx-auto mb-8 max-w-[46ch] text-dim">
-                @if (config('portfolio.available'))
-                    Open to technical product ownership, internal tools and full-stack roles in India —
-                    and to selected freelance work.
-                @else
-                    Always happy to talk about internal tools, Laravel, or an interesting problem.
-                    Freelance enquiries welcome.
-                @endif
+                {{ $content->valueOr('contact_intro', 'Always happy to talk about internal tools, Laravel, or an interesting problem. Freelance enquiries welcome.') }}
             </p>
 
             <livewire:contact-form />

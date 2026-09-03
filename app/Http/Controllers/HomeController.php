@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Enums\TechnologyCategory;
 use App\Models\Experience;
 use App\Models\Project;
+use App\Models\SiteContent;
 use App\Models\Technology;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
@@ -16,6 +17,7 @@ class HomeController extends Controller
     public function __invoke(): View
     {
         return view('home', [
+            'content' => SiteContent::current(),
             'projects' => $this->featuredProjects(),
             'experiences' => Experience::ordered()->get(),
             'skills' => $this->skillsByCategory(),

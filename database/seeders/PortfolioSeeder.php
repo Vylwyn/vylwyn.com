@@ -8,6 +8,7 @@ use App\Enums\ProjectStatus;
 use App\Enums\TechnologyCategory;
 use App\Models\Experience;
 use App\Models\Project;
+use App\Models\SiteContent;
 use App\Models\Technology;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -26,10 +27,51 @@ class PortfolioSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->seedSiteContent();
+
         $technologies = $this->seedTechnologies();
 
         $this->seedProjects($technologies);
         $this->seedExperiences();
+    }
+
+    /**
+     * Initial page copy. Editable afterwards at /vrdstudio → Site content.
+     *
+     * updateOrCreate on id 1 keeps this a singleton, and means re-running the
+     * seeder resets copy to these defaults — useful while iterating, worth
+     * remembering once you have edits worth keeping.
+     */
+    private function seedSiteContent(): void
+    {
+        SiteContent::updateOrCreate(['id' => 1], [
+            'hero_name' => 'Vylwyn D’Souza',
+            'hero_role' => 'IT Team Lead & Full-Stack Developer',
+            'hero_specialisms' => 'Laravel · Flutter',
+            'hero_tagline_lead' => 'I run the IT operations.',
+            'hero_tagline_highlight' => 'I also build the tools.',
+            'hero_lede' => 'Nine years leading a 22-person team at Alghanim International in Kuwait, and seven years building software alongside it.',
+
+            'work_heading' => 'Things I’ve shipped',
+            'work_intro' => 'Real applications with real users, built alongside a full-time role. Laravel on the backend, Flutter on mobile.',
+
+            'experience_heading' => 'Eleven years, two countries',
+            'experience_intro' => 'Operations and support leadership, alongside seven years of building software.',
+
+            'about_heading' => 'Hey, I’m Vylwyn',
+            'about_body' => <<<'MD'
+                I lead a 22-person team across IT support and procurement at **Alghanim International** in Kuwait. Alongside that, I've spent seven years building software — for clients, and for problems I found worth solving.
+
+                That work is in **Laravel and Flutter**: a bilingual commercial site for a client here in Kuwait, a photo-booth platform that had to survive shared hosting, and RoomSphere — a meeting-room and device management system.
+
+                The combination is the point. Most people building internal tools have never run the team that has to use them. Nine years of tickets, escalations and approval workflows is an unusual thing to bring to a codebase, and it shapes how I think about software people are *required* to use rather than choose.
+
+                I'm drawn to the invisible parts — data modelling, failure handling, offline behaviour, the reliability nobody notices until it's gone. I hold an **MCA in Computer Science**.
+                MD,
+
+            'contact_heading' => 'Let’s build something',
+            'contact_intro' => 'Always happy to talk about internal tools, Laravel, or an interesting problem. Freelance enquiries welcome.',
+        ]);
     }
 
     /**
