@@ -22,16 +22,23 @@ class SiteContent extends Model
      * The single row, cached.
      *
      * Every page view needs this, so an uncached read would add a query to
-     * every request for content that changes a few times a year. The cache is
-     * cleared in booted() below, so an edit in the admin panel is visible
-     * immediately rather than after some expiry.
+     * every request for content that changes a few times a year.
+     *
+     * Note what is cached: a plain ARRAY of attributes, never the model.
+     * Caching an Eloquent object serialises its class name, and if that class
+     * cannot be resolved on a later request — mid-deploy, say — PHP returns
+     * __PHP_Incomplete_Class instead. Combined with rememberForever that is a
+     * permanent 500 which only a manual cache:clear can fix. An array has no
+     * class identity to lose, so it survives any deploy.
      */
     public static function current(): self
     {
-        return Cache::rememberForever(
+        $attributes = Cache::rememberForever(
             self::CACHE_KEY,
-            static fn (): self => static::query()->firstOrNew([]),
+            static fn (): array => static::query()->first()?->attributesToArray() ?? [],
         );
+
+        return (new self)->forceFill($attributes);
     }
 
     protected static function booted(): void

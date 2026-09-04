@@ -57,6 +57,35 @@ describe('caching', function (): void {
         expect(Cache::has('site-content'))->toBeTrue();
     });
 
+    it('caches a plain array rather than a model instance', function (): void {
+        /**
+         * Regression guard. Caching the Eloquent object serialises its class
+         * name; if that class can't be resolved on a later request — mid-deploy,
+         * for instance — PHP returns __PHP_Incomplete_Class and, because this
+         * is rememberForever, the site 500s permanently until someone runs
+         * cache:clear by hand. This happened in production once. Not twice.
+         */
+        Cache::forget('site-content');
+
+        SiteContent::create([
+            'hero_name' => 'Array Cached',
+            'hero_role' => 'Role',
+            'hero_tagline_lead' => 'Lead',
+        ]);
+
+        SiteContent::current();
+
+        expect(Cache::get('site-content'))->toBeArray()
+            ->not->toBeInstanceOf(SiteContent::class);
+    });
+
+    it('still returns a usable model when nothing is stored', function (): void {
+        Cache::forget('site-content');
+
+        expect(SiteContent::current())->toBeInstanceOf(SiteContent::class)
+            ->and(SiteContent::current()->valueOr('hero_role', 'fallback'))->toBe('fallback');
+    });
+
     it('clears the cache when content is saved', function (): void {
         $content = SiteContent::create([
             'hero_name' => 'Original',

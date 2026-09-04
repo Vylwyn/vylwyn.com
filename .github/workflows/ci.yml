@@ -256,6 +256,11 @@ jobs:
             # public_html gets its own, pointing at the same target.
             php artisan storage:link || true
 
+            # Drop the application cache. Anything cached by the previous
+            # release was serialised against the previous code; keeping it is
+            # how you get __PHP_Incomplete_Class errors on a fresh deploy.
+            php artisan cache:clear || true
+
             # Cache config, routes, views and events. Biggest production
             # speed-up available, and the reason env() must never be called
             # outside config files — once cached it returns null.
