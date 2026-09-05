@@ -5,6 +5,16 @@
 
     RewriteEngine On
 
+    # Canonical host: strip the www. prefix.
+    #
+    # Without this, www.vylwyn.com and vylwyn.com both serve the full site and
+    # each declares itself canonical — search engines read that as duplicate
+    # content and split ranking signals between the two.
+    #
+    # Only matches hosts beginning "www."; subdomains are untouched.
+    RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+    RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
