@@ -29,22 +29,36 @@ it('formats the period with both dates for a past role', function (): void {
     expect($experience->period())->toBe('Jun 2016 — Jul 2017');
 });
 
-it('calculates duration in years and months', function (): void {
+/**
+ * Durations must match LinkedIn exactly — these are the real dates from the
+ * profile, with the tenure LinkedIn displays for each.
+ */
+it('counts the final month inclusively, as LinkedIn does', function (
+    string $start,
+    string $end,
+    string $expected,
+): void {
     $experience = Experience::factory()->create([
-        'started_on' => '2016-06-01',
-        'ended_on' => '2017-08-01',
+        'started_on' => $start,
+        'ended_on' => $end,
     ]);
 
-    expect($experience->duration())->toBe('1 yr 2 mos');
-});
+    expect($experience->duration())->toBe($expected);
+})->with([
+    'Ali Alghanim & Sons' => ['2016-06-01', '2017-07-01', '1 yr 2 mos'],
+    'Davlin Software' => ['2015-01-01', '2015-06-01', '6 mos'],
+    'MSDI' => ['2011-08-01', '2012-09-01', '1 yr 2 mos'],
+    'exactly one year' => ['2020-01-01', '2020-12-01', '1 yr'],
+    'a single month' => ['2020-01-01', '2020-01-01', '1 mo'],
+]);
 
-it('omits the year component for short roles', function (): void {
-    $experience = Experience::factory()->create([
-        'started_on' => '2015-01-01',
-        'ended_on' => '2015-07-01',
+it('does not pad a current role', function (): void {
+    // "Present" is not a bounded month, so there is nothing to count inclusively.
+    $experience = Experience::factory()->current()->create([
+        'started_on' => now()->subYears(2)->subMonths(3)->startOfMonth(),
     ]);
 
-    expect($experience->duration())->toBe('6 mos');
+    expect($experience->duration())->toBe('2 yrs 3 mos');
 });
 
 it('orders most recent first', function (): void {

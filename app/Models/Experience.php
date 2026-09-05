@@ -62,10 +62,17 @@ class Experience extends Model
 
     /**
      * "9 yrs 2 mos", matching how LinkedIn presents tenure.
+     *
+     * LinkedIn counts the final month inclusively: Jun 2016 – Jul 2017 reads as
+     * 1 yr 2 mos, not 1 yr 1 mo. A current role has no bounded end month, so it
+     * gets no such padding. Without this the site contradicts the CV it sits
+     * beside, which is a worse problem than being a month out.
      */
     public function duration(): string
     {
-        $end = $this->ended_on ?? now();
+        $end = $this->isCurrent()
+            ? now()
+            : $this->ended_on->copy()->addMonth();
 
         $years = (int) $this->started_on->diffInYears($end);
         $months = (int) $this->started_on->copy()->addYears($years)->diffInMonths($end);
