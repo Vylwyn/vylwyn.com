@@ -1,28 +1,48 @@
 @props(['project'])
 
-<article class="reveal ring-gradient relative overflow-hidden rounded-[20px] border border-line bg-gradient-to-br from-surface to-surface/50 p-7 backdrop-blur-sm transition-transform duration-300 ease-[cubic-bezier(.16,1,.3,1)] hover:-translate-y-1.5">
+<article class="reveal ring-gradient group relative overflow-hidden rounded-[20px] border border-line bg-gradient-to-br from-surface to-surface/50 p-7 backdrop-blur-sm transition-transform duration-300 ease-[cubic-bezier(.16,1,.3,1)] hover:-translate-y-1.5">
 
-    <div class="mb-4 flex items-center justify-between gap-3">
-        <div class="grid h-10.5 w-10.5 place-items-center rounded-xl border border-violet/30 bg-gradient-to-br from-violet/25 to-azure/15">
-            <svg class="h-5 w-5 text-lavender" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h12A2.25 2.25 0 0120.25 6v12A2.25 2.25 0 0118 20.25H6A2.25 2.25 0 013.75 18V6z" />
-                <path stroke-linecap="round" d="M3.75 8.25h16.5" />
-            </svg>
+    @php
+        $status = $project->status;
+        $tone = match ($status->value) {
+            'live' => 'bg-ok/15 text-ok border-ok/30',
+            'in_progress' => 'bg-warn/15 text-warn border-warn/30',
+            default => 'bg-faint/15 text-faint border-faint/30',
+        };
+        $badge = $status->getLabel() . ($project->client ? ' · Client' : '');
+    @endphp
+
+    @if ($project->cover_image)
+        {{-- Explicit width and height reserve the space before the image loads,
+             so the card doesn't jump as it arrives (cumulative layout shift). --}}
+        <div class="relative mb-5 overflow-hidden rounded-xl border border-line">
+            <img src="{{ Storage::disk('public')->url($project->cover_image) }}"
+                 alt="Screenshot of {{ $project->title }}"
+                 width="1200"
+                 height="750"
+                 loading="lazy"
+                 decoding="async"
+                 class="aspect-16/10 w-full object-cover object-top transition duration-500 group-hover:scale-[1.03]">
+
+            <span class="absolute top-2.5 right-2.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-[10.5px] font-bold uppercase tracking-wider backdrop-blur-md {{ $tone }}">
+                {{ $badge }}
+            </span>
         </div>
+    @else
+        {{-- No cover yet: fall back to the icon tile so the grid stays even. --}}
+        <div class="mb-4 flex items-center justify-between gap-3">
+            <div class="grid h-10.5 w-10.5 place-items-center rounded-xl border border-violet/30 bg-gradient-to-br from-violet/25 to-azure/15">
+                <svg class="h-5 w-5 text-lavender" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h12A2.25 2.25 0 0120.25 6v12A2.25 2.25 0 0118 20.25H6A2.25 2.25 0 013.75 18V6z" />
+                    <path stroke-linecap="round" d="M3.75 8.25h16.5" />
+                </svg>
+            </div>
 
-        @php
-            $status = $project->status;
-            $tone = match ($status->value) {
-                'live' => 'bg-ok/15 text-ok border-ok/30',
-                'in_progress' => 'bg-warn/15 text-warn border-warn/30',
-                default => 'bg-faint/15 text-faint border-faint/30',
-            };
-        @endphp
-
-        <span class="whitespace-nowrap rounded-full border px-2.5 py-1 text-[10.5px] font-bold uppercase tracking-wider {{ $tone }}">
-            {{ $status->getLabel() }}@if ($project->client) · Client @endif
-        </span>
-    </div>
+            <span class="whitespace-nowrap rounded-full border px-2.5 py-1 text-[10.5px] font-bold uppercase tracking-wider {{ $tone }}">
+                {{ $badge }}
+            </span>
+        </div>
+    @endif
 
     <h3 class="mb-2.5 text-xl font-bold tracking-tight">
         @if ($project->hasCaseStudy())

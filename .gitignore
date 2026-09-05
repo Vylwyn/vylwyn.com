@@ -16,6 +16,7 @@
 /node_modules
 /public/build
 /public/css/filament
+/screenshots
 /public/fonts/filament
 /public/js/filament
 /public/fonts-manifest.dev.json
