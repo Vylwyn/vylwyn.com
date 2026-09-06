@@ -33,6 +33,32 @@ it('renders the about body as markdown', function (): void {
         ->assertSee('Second paragraph.');
 });
 
+describe('the about photo', function (): void {
+    it('shows the placeholder when no photo is set', function (): void {
+        SiteContent::create([
+            'hero_name' => 'Vylwyn',
+            'hero_role' => 'Role',
+            'hero_tagline_lead' => 'Lead',
+            'photo' => null,
+        ]);
+
+        $this->get(route('home'))->assertSee('placeholder');
+    });
+
+    it('renders the photo when one is set', function (): void {
+        SiteContent::create([
+            'hero_name' => 'Vylwyn',
+            'hero_role' => 'Role',
+            'hero_tagline_lead' => 'Lead',
+            'photo' => 'about/vylwyn.jpg',
+        ]);
+
+        $this->get(route('home'))
+            ->assertSee('about/vylwyn.jpg', escape: false)
+            ->assertDontSee('600 × 600', escape: false);
+    });
+});
+
 it('falls back to config when no row exists', function (): void {
     // A fresh install must still render sensibly rather than showing blanks.
     expect(SiteContent::query()->count())->toBe(0);

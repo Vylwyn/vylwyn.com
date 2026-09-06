@@ -94,15 +94,29 @@
 
         <div class="mx-auto grid max-w-[980px] items-start gap-11 lg:grid-cols-[220px_1fr]">
 
-            {{-- Photo placeholder. Fixed aspect ratio so swapping in the real
-            image causes no layout shift. --}}
-            <div
-                class="reveal relative flex aspect-square flex-col items-center justify-center gap-2.5 overflow-hidden rounded-[18px] border border-dashed border-violet/35 bg-gradient-to-br from-surface-2 to-surface p-4.5 text-center font-mono text-[11px] text-faint">
-                <div aria-hidden="true" class="absolute inset-0 bg-gradient-to-br from-violet/15 to-transparent"></div>
-                <span class="relative text-2xl">◍</span>
-                <span class="relative">PHOTO<br>600 × 600</span>
-                <span class="relative text-[#3a3a4e]">placeholder</span>
-            </div>
+            {{-- Same square footprint either way, so swapping the real photo in
+                 causes no layout shift. --}}
+            @if ($content->photo)
+                <div class="reveal relative aspect-square overflow-hidden rounded-[18px] border border-line">
+                    <img src="{{ Storage::disk('public')->url($content->photo) }}"
+                         alt="{{ $content->valueOr('hero_name', config('portfolio.name')) }}"
+                         width="600"
+                         height="600"
+                         loading="lazy"
+                         decoding="async"
+                         class="h-full w-full object-cover">
+                    <div aria-hidden="true"
+                         class="pointer-events-none absolute inset-0 bg-gradient-to-br from-violet/15 to-transparent"></div>
+                </div>
+            @else
+                <div
+                    class="reveal relative flex aspect-square flex-col items-center justify-center gap-2.5 overflow-hidden rounded-[18px] border border-dashed border-violet/35 bg-gradient-to-br from-surface-2 to-surface p-4.5 text-center font-mono text-[11px] text-faint">
+                    <div aria-hidden="true" class="absolute inset-0 bg-gradient-to-br from-violet/15 to-transparent"></div>
+                    <span class="relative text-2xl">◍</span>
+                    <span class="relative">PHOTO<br>600 × 600</span>
+                    <span class="relative text-[#3a3a4e]">placeholder</span>
+                </div>
+            @endif
 
             {{-- Authored as markdown in the admin panel. Trusted content —
                  only you can write it — so rendering as HTML is safe here. --}}

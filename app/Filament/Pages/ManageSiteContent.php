@@ -7,6 +7,7 @@ namespace App\Filament\Pages;
 use App\Models\SiteContent;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -105,6 +106,24 @@ class ManageSiteContent extends Page
                         TextInput::make('about_heading')
                             ->label('Heading')
                             ->required(),
+
+                        FileUpload::make('photo')
+                            ->label('Photo')
+                            ->image()
+                            ->avatar()
+                            /**
+                             * Cropped square on upload, so the About column can't
+                             * be thrown out by a portrait or landscape original.
+                             */
+                            ->imageEditor()
+                            ->imageCropAspectRatio('1:1')
+                            ->imageResizeTargetWidth('600')
+                            ->imageResizeTargetHeight('600')
+                            ->disk('public')
+                            ->directory('about')
+                            ->visibility('public')
+                            ->maxSize(4096)
+                            ->helperText('Square. Leave empty to keep the placeholder.'),
 
                         MarkdownEditor::make('about_body')
                             ->label('Body')
